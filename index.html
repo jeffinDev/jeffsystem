@@ -17,6 +17,7 @@
       --success: #16a34a;
       --warning: #d97706;
       --danger: #dc2626;
+      --info: #2563eb;
     }
     * {
       margin: 0;
@@ -306,6 +307,12 @@
     button.danger:hover {
       background: linear-gradient(to bottom, #b91c1c, var(--danger));
     }
+    button.info {
+      background: linear-gradient(to bottom, var(--info), #1e40af);
+    }
+    button.info:hover {
+      background: linear-gradient(to bottom, #1e40af, var(--info));
+    }
     .small-btn {
       padding: 6px 12px;
       font-size: 0.8rem;
@@ -450,6 +457,44 @@
       background-color: var(--primary-light);
       color: var(--primary-dark);
     }
+    .action-buttons {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .action-buttons button {
+      margin-top: 0;
+    }
+    .confirmation-modal {
+      text-align: center;
+    }
+    .confirmation-modal .modal-content {
+      max-width: 400px;
+    }
+    .confirmation-modal .buttons {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-top: 20px;
+    }
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      margin-top: 20px;
+    }
+    .empty-state i {
+      font-size: 3rem;
+      color: var(--primary-light);
+      margin-bottom: 15px;
+    }
+    .empty-state p {
+      color: #64748b;
+      margin-top: 10px;
+    }
   </style>
 </head>
 <body>
@@ -459,17 +504,17 @@
       <h1>JEFFIN DESIGNER</h1>
     </div>
     <div class="user-info">
-      <span>Olá, Jefferson!</span>
+      <span>Olá, JeffinDzn!</span>
       <div class="user-avatar">JD</div>
     </div>
   </header>
 
   <nav>
-    <button onclick="showTab('dashboard')"><i class="fas fa-tachometer-alt"></i> Dashboard</button>
-    <button onclick="showTab('pedidos')"><i class="fas fa-shopping-bag"></i> Pedidos</button>
-    <button onclick="showTab('clientes')"><i class="fas fa-users"></i> Clientes</button>
-    <button onclick="showTab('anotacoes')"><i class="fas fa-clipboard"></i> Anotações</button>
-    <button onclick="showTab('relatorios')"><i class="fas fa-chart-pie"></i> Relatórios</button>
+    <button data-tab="dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</button>
+    <button data-tab="pedidos"><i class="fas fa-shopping-bag"></i> Pedidos</button>
+    <button data-tab="clientes"><i class="fas fa-users"></i> Clientes</button>
+    <button data-tab="anotacoes"><i class="fas fa-clipboard"></i> Anotações</button>
+    <button data-tab="relatorios"><i class="fas fa-chart-pie"></i> Relatórios</button>
   </nav>
 
   <!-- Dashboard -->
@@ -540,11 +585,15 @@
     <h2><i class="fas fa-shopping-bag"></i> Pedidos</h2>
     
     <div class="search-bar">
-      <input type="text" id="buscaPedidos" placeholder="Buscar pedidos..." oninput="filtrarPedidos()">
-      <button><i class="fas fa-search"></i> Buscar</button>
+      <input type="text" id="buscaPedidos" placeholder="Buscar pedidos...">
+      <button id="btnBuscarPedidos"><i class="fas fa-search"></i> Buscar</button>
     </div>
     
-    <button onclick="abrirModalPedido()"><i class="fas fa-plus"></i> Novo Pedido</button>
+    <div class="action-buttons">
+      <button id="btnNovoPedido"><i class="fas fa-plus"></i> Novo Pedido</button>
+      <button id="btnLimparPedidos" class="danger"><i class="fas fa-trash"></i> Limpar Pedidos</button>
+      <button id="btnExportarPedidos" class="info"><i class="fas fa-file-export"></i> Exportar</button>
+    </div>
     
     <table id="tabelaPedidos">
       <thead>
@@ -568,11 +617,15 @@
     <h2><i class="fas fa-users"></i> Clientes</h2>
     
     <div class="search-bar">
-      <input type="text" id="buscaClientes" placeholder="Buscar clientes..." oninput="filtrarClientes()">
-      <button><i class="fas fa-search"></i> Buscar</button>
+      <input type="text" id="buscaClientes" placeholder="Buscar clientes...">
+      <button id="btnBuscarClientes"><i class="fas fa-search"></i> Buscar</button>
     </div>
     
-    <button onclick="abrirModalCliente()"><i class="fas fa-plus"></i> Novo Cliente</button>
+    <div class="action-buttons">
+      <button id="btnNovoCliente"><i class="fas fa-plus"></i> Novo Cliente</button>
+      <button id="btnLimparClientes" class="danger"><i class="fas fa-trash"></i> Limpar Clientes</button>
+      <button id="btnExportarClientes" class="info"><i class="fas fa-file-export"></i> Exportar</button>
+    </div>
     
     <table id="tabelaClientes">
       <thead>
@@ -598,7 +651,10 @@
     <div class="form-row">
       <label class="section-title">Nova Anotação</label>
       <textarea id="novaAnotacao" placeholder="Escreva suas anotações aqui..."></textarea>
-      <button onclick="salvarAnotacao()"><i class="fas fa-save"></i> Salvar Anotação</button>
+      <div class="action-buttons">
+        <button id="btnSalvarAnotacao"><i class="fas fa-save"></i> Salvar Anotação</button>
+        <button id="btnLimparAnotacoes" class="danger"><i class="fas fa-trash"></i> Limpar Anotações</button>
+      </div>
     </div>
     
     <div id="listaAnotacoes">
@@ -652,7 +708,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <div class="modal-title">Novo Pedido</div>
-        <button class="close-modal" onclick="fecharModal('modalPedido')">&times;</button>
+        <button class="close-modal">&times;</button>
       </div>
       <div class="form-group">
         <label class="section-title">Cliente</label>
@@ -692,7 +748,7 @@
           <option value="completed">Concluído</option>
         </select>
       </div>
-      <button style="width: 100%;" onclick="salvarPedido()"><i class="fas fa-save"></i> Salvar Pedido</button>
+      <button id="btnSalvarPedido" style="width: 100%;"><i class="fas fa-save"></i> Salvar Pedido</button>
     </div>
   </div>
 
@@ -701,7 +757,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <div class="modal-title">Novo Cliente</div>
-        <button class="close-modal" onclick="fecharModal('modalCliente')">&times;</button>
+        <button class="close-modal">&times;</button>
       </div>
       <div class="form-group">
         <label class="section-title">Nome</label>
@@ -719,7 +775,22 @@
         <label class="section-title">Observações</label>
         <textarea id="clienteObservacoes" placeholder="Observações sobre o cliente..."></textarea>
       </div>
-      <button style="width: 100%;" onclick="salvarCliente()"><i class="fas fa-save"></i> Salvar Cliente</button>
+      <button id="btnSalvarCliente" style="width: 100%;"><i class="fas fa-save"></i> Salvar Cliente</button>
+    </div>
+  </div>
+
+  <!-- Modal de Confirmação -->
+  <div id="modalConfirmacao" class="modal confirmation-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">Confirmação</div>
+        <button class="close-modal">&times;</button>
+      </div>
+      <p id="confirmacaoMensagem">Tem certeza que deseja realizar esta ação?</p>
+      <div class="buttons">
+        <button id="btnConfirmarAcao" class="danger"><i class="fas fa-check"></i> Confirmar</button>
+        <button id="btnCancelarAcao" class="secondary"><i class="fas fa-times"></i> Cancelar</button>
+      </div>
     </div>
   </div>
 
@@ -739,6 +810,7 @@
       // Métodos para clientes
       adicionarCliente: function(cliente) {
         cliente.id = this.clientes.length > 0 ? Math.max(...this.clientes.map(c => c.id)) + 1 : 1;
+        cliente.data = new Date().toISOString();
         this.clientes.push(cliente);
         this.salvar();
         return cliente;
@@ -762,6 +834,12 @@
           return true;
         }
         return false;
+      },
+      
+      limparClientes: function() {
+        this.clientes = [];
+        this.salvar();
+        return true;
       },
       
       // Métodos para pedidos
@@ -793,6 +871,12 @@
         return false;
       },
       
+      limparPedidos: function() {
+        this.pedidos = [];
+        this.salvar();
+        return true;
+      },
+      
       // Métodos para anotações
       adicionarAnotacao: function(anotacao) {
         anotacao.id = this.anotacoes.length > 0 ? Math.max(...this.anotacoes.map(a => a.id)) + 1 : 1;
@@ -820,8 +904,27 @@
           return true;
         }
         return false;
+      },
+      
+      limparAnotacoes: function() {
+        this.anotacoes = [];
+        this.salvar();
+        return true;
+      },
+      
+      // Exportar dados
+      exportarClientes: function() {
+        return JSON.stringify(this.clientes, null, 2);
+      },
+      
+      exportarPedidos: function() {
+        return JSON.stringify(this.pedidos, null, 2);
       }
     };
+
+    // Variáveis para controle de ações
+    let acaoConfirmada = null;
+    let acaoAtual = null;
 
     // Funções auxiliares
     function formatarData(dataString) {
@@ -838,7 +941,6 @@
       document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
       document.getElementById(id).classList.add('active');
       
-      // Atualizar os dados quando a aba é aberta
       if (id === 'dashboard') atualizarDashboard();
       if (id === 'pedidos') carregarPedidos();
       if (id === 'clientes') carregarClientes();
@@ -870,11 +972,6 @@
           document.getElementById('pedidoValor').value = pedido.valor;
           document.getElementById('pedidoPrazo').value = pedido.prazo.split('T')[0];
           document.getElementById('pedidoStatus').value = pedido.status;
-          
-          // Alterar o botão para salvar edição
-          const btn = modal.querySelector('button');
-          btn.innerHTML = '<i class="fas fa-save"></i> Salvar Alterações';
-          btn.onclick = function() { salvarPedido(pedidoId); };
         }
       } else {
         // Se for novo pedido, limpar os campos
@@ -885,11 +982,6 @@
         document.getElementById('pedidoValor').value = '';
         document.getElementById('pedidoPrazo').value = '';
         document.getElementById('pedidoStatus').value = 'pending';
-        
-        // Alterar o botão para salvar novo
-        const btn = modal.querySelector('button');
-        btn.innerHTML = '<i class="fas fa-save"></i> Salvar Pedido';
-        btn.onclick = function() { salvarPedido(); };
       }
       
       modal.style.display = 'flex';
@@ -907,11 +999,6 @@
           document.getElementById('clienteEmail').value = cliente.email || '';
           document.getElementById('clienteTelefone').value = cliente.telefone || '';
           document.getElementById('clienteObservacoes').value = cliente.observacoes || '';
-          
-          // Alterar o botão para salvar edição
-          const btn = modal.querySelector('button');
-          btn.innerHTML = '<i class="fas fa-save"></i> Salvar Alterações';
-          btn.onclick = function() { salvarCliente(clienteId); };
         }
       } else {
         // Se for novo cliente, limpar os campos
@@ -920,21 +1007,23 @@
         document.getElementById('clienteEmail').value = '';
         document.getElementById('clienteTelefone').value = '';
         document.getElementById('clienteObservacoes').value = '';
-        
-        // Alterar o botão para salvar novo
-        const btn = modal.querySelector('button');
-        btn.innerHTML = '<i class="fas fa-save"></i> Salvar Cliente';
-        btn.onclick = function() { salvarCliente(); };
       }
       
       modal.style.display = 'flex';
     }
 
-    function fecharModal(id) {
-      document.getElementById(id).style.display = 'none';
+    function abrirModalConfirmacao(mensagem, acao) {
+      document.getElementById('confirmacaoMensagem').textContent = mensagem;
+      acaoAtual = acao;
+      document.getElementById('modalConfirmacao').style.display = 'flex';
     }
 
-    // Funções para salvar dados
+    function fecharModal() {
+      document.querySelectorAll('.modal').forEach(modal => {
+        modal.style.display = 'none';
+      });
+    }
+
     function salvarPedido(pedidoId = null) {
       const clienteId = parseInt(document.getElementById('pedidoCliente').value);
       const tipo = document.getElementById('pedidoTipo').value;
@@ -969,7 +1058,7 @@
         // Edição
         if (DB.atualizarPedido(pedidoId, pedidoData)) {
           alert('Pedido atualizado com sucesso!');
-          fecharModal('modalPedido');
+          fecharModal();
           carregarPedidos();
           atualizarDashboard();
           atualizarRelatorios();
@@ -980,7 +1069,7 @@
         // Novo pedido
         DB.adicionarPedido(pedidoData);
         alert('Pedido cadastrado com sucesso!');
-        fecharModal('modalPedido');
+        fecharModal();
         carregarPedidos();
         atualizarDashboard();
         atualizarRelatorios();
@@ -1009,7 +1098,7 @@
         // Edição
         if (DB.atualizarCliente(clienteId, clienteData)) {
           alert('Cliente atualizado com sucesso!');
-          fecharModal('modalCliente');
+          fecharModal();
           carregarClientes();
           // Atualizar também os pedidos que podem ter referência ao nome do cliente
           DB.pedidos.forEach(pedido => {
@@ -1026,12 +1115,12 @@
         // Novo cliente
         DB.adicionarCliente(clienteData);
         alert('Cliente cadastrado com sucesso!');
-        fecharModal('modalCliente');
+        fecharModal();
         carregarClientes();
       }
     }
 
-    function salvarAnotacao(anotacaoId = null) {
+    function salvarAnotacao() {
       const conteudo = document.getElementById('novaAnotacao').value.trim();
       
       if (!conteudo) {
@@ -1039,20 +1128,82 @@
         return;
       }
       
-      if (anotacaoId) {
-        // Edição (implementar se necessário)
-      } else {
-        // Nova anotação
-        DB.adicionarAnotacao({ conteudo });
-        document.getElementById('novaAnotacao').value = '';
-        carregarAnotacoes();
-      }
+      DB.adicionarAnotacao({ conteudo });
+      document.getElementById('novaAnotacao').value = '';
+      carregarAnotacoes();
+    }
+
+    function limparClientes() {
+      abrirModalConfirmacao('Tem certeza que deseja limpar TODOS os clientes? Esta ação não pode ser desfeita.', () => {
+        if (DB.limparClientes()) {
+          alert('Clientes removidos com sucesso!');
+          fecharModal();
+          carregarClientes();
+        }
+      });
+    }
+
+    function limparPedidos() {
+      abrirModalConfirmacao('Tem certeza que deseja limpar TODOS os pedidos? Esta ação não pode ser desfeita.', () => {
+        if (DB.limparPedidos()) {
+          alert('Pedidos removidos com sucesso!');
+          fecharModal();
+          carregarPedidos();
+          atualizarDashboard();
+          atualizarRelatorios();
+        }
+      });
+    }
+
+    function limparAnotacoes() {
+      abrirModalConfirmacao('Tem certeza que deseja limpar TODAS as anotações? Esta ação não pode ser desfeita.', () => {
+        if (DB.limparAnotacoes()) {
+          alert('Anotações removidas com sucesso!');
+          fecharModal();
+          carregarAnotacoes();
+        }
+      });
+    }
+
+    function exportarClientes() {
+      const data = DB.exportarClientes();
+      const blob = new Blob([data], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'clientes_jeffin_designer.json';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function exportarPedidos() {
+      const data = DB.exportarPedidos();
+      const blob = new Blob([data], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'pedidos_jeffin_designer.json';
+      a.click();
+      URL.revokeObjectURL(url);
     }
 
     // Funções para carregar dados na UI
     function carregarPedidos() {
       const tabela = document.getElementById('tabelaPedidos').querySelector('tbody');
       tabela.innerHTML = '';
+      
+      if (DB.pedidos.length === 0) {
+        tabela.innerHTML = `
+          <tr>
+            <td colspan="6" class="empty-state">
+              <i class="fas fa-box-open"></i>
+              <h3>Nenhum pedido encontrado</h3>
+              <p>Clique em "Novo Pedido" para adicionar seu primeiro pedido</p>
+            </td>
+          </tr>
+        `;
+        return;
+      }
       
       DB.pedidos.sort((a, b) => new Date(b.data) - new Date(a.data)).forEach(pedido => {
         const tr = document.createElement('tr');
@@ -1073,13 +1224,32 @@
             statusClass === 'completed' ? 'Concluído' : 'Cancelado'
           }</span></td>
           <td>
-            <button class="small-btn" onclick="verDetalhesPedido(${pedido.id})"><i class="fas fa-eye"></i></button>
-            <button class="small-btn secondary" onclick="abrirModalPedido(${pedido.id})"><i class="fas fa-edit"></i></button>
-            <button class="small-btn danger" onclick="cancelarPedido(${pedido.id})"><i class="fas fa-times"></i></button>
+            <button class="small-btn ver-pedido" data-id="${pedido.id}"><i class="fas fa-eye"></i></button>
+            <button class="small-btn secondary editar-pedido" data-id="${pedido.id}"><i class="fas fa-edit"></i></button>
+            <button class="small-btn danger cancelar-pedido" data-id="${pedido.id}"><i class="fas fa-times"></i></button>
           </td>
         `;
         
         tabela.appendChild(tr);
+      });
+
+      // Adicionar event listeners aos botões dos pedidos
+      document.querySelectorAll('.ver-pedido').forEach(btn => {
+        btn.addEventListener('click', function() {
+          verDetalhesPedido(parseInt(this.getAttribute('data-id')));
+        });
+      });
+
+      document.querySelectorAll('.editar-pedido').forEach(btn => {
+        btn.addEventListener('click', function() {
+          abrirModalPedido(parseInt(this.getAttribute('data-id')));
+        });
+      });
+
+      document.querySelectorAll('.cancelar-pedido').forEach(btn => {
+        btn.addEventListener('click', function() {
+          cancelarPedido(parseInt(this.getAttribute('data-id')));
+        });
       });
     }
 
@@ -1087,9 +1257,20 @@
       const tabela = document.getElementById('tabelaClientes').querySelector('tbody');
       tabela.innerHTML = '';
       
+      if (DB.clientes.length === 0) {
+        tabela.innerHTML = `
+          <tr>
+            <td colspan="6" class="empty-state">
+              <i class="fas fa-user-slash"></i>
+              <h3>Nenhum cliente encontrado</h3>
+              <p>Clique em "Novo Cliente" para adicionar seu primeiro cliente</p>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+      
       DB.clientes.forEach(cliente => {
-        const tr = document.createElement('tr');
-        
         // Contar pedidos do cliente
         const totalPedidos = DB.pedidos.filter(p => p.clienteId === cliente.id).length;
         
@@ -1099,6 +1280,7 @@
           ? formatarData(Math.max(...pedidosCliente.map(p => new Date(p.data)))) 
           : 'Nenhuma';
         
+        const tr = document.createElement('tr');
         tr.innerHTML = `
           <td>${cliente.nome}</td>
           <td>${cliente.email || '-'}</td>
@@ -1106,18 +1288,42 @@
           <td>${totalPedidos}</td>
           <td>${ultimaCompra}</td>
           <td>
-            <button class="small-btn" onclick="verDetalhesCliente(${cliente.id})"><i class="fas fa-eye"></i></button>
-            <button class="small-btn secondary" onclick="abrirModalCliente(${cliente.id})"><i class="fas fa-edit"></i></button>
+            <button class="small-btn ver-cliente" data-id="${cliente.id}"><i class="fas fa-eye"></i></button>
+            <button class="small-btn secondary editar-cliente" data-id="${cliente.id}"><i class="fas fa-edit"></i></button>
           </td>
         `;
         
         tabela.appendChild(tr);
+      });
+
+      // Adicionar event listeners aos botões dos clientes
+      document.querySelectorAll('.ver-cliente').forEach(btn => {
+        btn.addEventListener('click', function() {
+          verDetalhesCliente(parseInt(this.getAttribute('data-id')));
+        });
+      });
+
+      document.querySelectorAll('.editar-cliente').forEach(btn => {
+        btn.addEventListener('click', function() {
+          abrirModalCliente(parseInt(this.getAttribute('data-id')));
+        });
       });
     }
 
     function carregarAnotacoes() {
       const container = document.getElementById('listaAnotacoes');
       container.innerHTML = '';
+      
+      if (DB.anotacoes.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <i class="fas fa-clipboard"></i>
+            <h3>Nenhuma anotação encontrada</h3>
+            <p>Adicione sua primeira anotação no campo acima</p>
+          </div>
+        `;
+        return;
+      }
       
       DB.anotacoes.sort((a, b) => new Date(b.data) - new Date(a.data)).forEach(anotacao => {
         const div = document.createElement('div');
@@ -1127,11 +1333,18 @@
           <div class="anotacao-data">${formatarData(anotacao.data)}</div>
           <div class="anotacao-conteudo">${anotacao.conteudo}</div>
           <div class="anotacao-acoes">
-            <button class="small-btn danger" onclick="removerAnotacao(${anotacao.id})"><i class="fas fa-trash"></i></button>
+            <button class="small-btn danger remover-anotacao" data-id="${anotacao.id}"><i class="fas fa-trash"></i></button>
           </div>
         `;
         
         container.appendChild(div);
+      });
+
+      // Adicionar event listeners aos botões de remover anotação
+      document.querySelectorAll('.remover-anotacao').forEach(btn => {
+        btn.addEventListener('click', function() {
+          removerAnotacao(parseInt(this.getAttribute('data-id')));
+        });
       });
     }
 
@@ -1176,30 +1389,48 @@
         .sort((a, b) => new Date(b.data) - new Date(a.data))
         .slice(0, 5);
       
-      ultimosPedidos.forEach(pedido => {
-        const tr = document.createElement('tr');
-        
-        const statusClass = {
-          pending: 'pending',
-          completed: 'completed',
-          canceled: 'canceled'
-        }[pedido.status] || 'pending';
-        
-        tr.innerHTML = `
-          <td>#${pedido.id}</td>
-          <td>${pedido.clienteNome}</td>
-          <td>${formatarData(pedido.data)}</td>
-          <td>${formatarMoeda(pedido.valor)}</td>
-          <td><span class="status ${statusClass}">${
-            statusClass === 'pending' ? 'Pendente' : 
-            statusClass === 'completed' ? 'Concluído' : 'Cancelado'
-          }</span></td>
-          <td>
-            <button class="small-btn" onclick="verDetalhesPedido(${pedido.id})"><i class="fas fa-eye"></i></button>
-          </td>
+      if (ultimosPedidos.length === 0) {
+        tabela.innerHTML = `
+          <tr>
+            <td colspan="6" class="empty-state">
+              <i class="fas fa-box-open"></i>
+              <h3>Nenhum pedido encontrado</h3>
+            </td>
+          </tr>
         `;
-        
-        tabela.appendChild(tr);
+      } else {
+        ultimosPedidos.forEach(pedido => {
+          const tr = document.createElement('tr');
+          
+          const statusClass = {
+            pending: 'pending',
+            completed: 'completed',
+            canceled: 'canceled'
+          }[pedido.status] || 'pending';
+          
+          tr.innerHTML = `
+            <td>#${pedido.id}</td>
+            <td>${pedido.clienteNome}</td>
+            <td>${formatarData(pedido.data)}</td>
+            <td>${formatarMoeda(pedido.valor)}</td>
+            <td><span class="status ${statusClass}">${
+              statusClass === 'pending' ? 'Pendente' : 
+              statusClass === 'completed' ? 'Concluído' : 'Cancelado'
+            }</span></td>
+            <td>
+              <button class="small-btn ver-pedido" data-id="${pedido.id}"><i class="fas fa-eye"></i></button>
+            </td>
+          `;
+          
+          tabela.appendChild(tr);
+        });
+      }
+
+      // Adicionar event listeners aos botões de ver pedido
+      document.querySelectorAll('.ver-pedido').forEach(btn => {
+        btn.addEventListener('click', function() {
+          verDetalhesPedido(parseInt(this.getAttribute('data-id')));
+        });
       });
       
       // Atualizar gráfico de vendas
@@ -1248,7 +1479,7 @@
       
       DB.pedidos.forEach(pedido => {
         const dataStr = pedido.data.split('T')[0];
-        if (dados.hasOwnProperty(dataStr) {
+        if (dados.hasOwnProperty(dataStr)) {
           dados[dataStr] += pedido.status === 'completed' ? pedido.valor : 0;
         }
       });
@@ -1510,7 +1741,65 @@
 
     // Inicialização
     document.addEventListener('DOMContentLoaded', function() {
-      // Adicionar alguns dados de exemplo se o banco estiver vazio
+      // Adicionar event listeners para os botões de navegação
+      document.querySelectorAll('nav button').forEach(btn => {
+        btn.addEventListener('click', function() {
+          showTab(this.getAttribute('data-tab'));
+        });
+      });
+      
+      // Botões principais
+      document.getElementById('btnNovoPedido').addEventListener('click', () => abrirModalPedido());
+      document.getElementById('btnNovoCliente').addEventListener('click', () => abrirModalCliente());
+      document.getElementById('btnSalvarAnotacao').addEventListener('click', salvarAnotacao);
+      document.getElementById('btnBuscarPedidos').addEventListener('click', filtrarPedidos);
+      document.getElementById('btnBuscarClientes').addEventListener('click', filtrarClientes);
+      document.getElementById('btnLimparClientes').addEventListener('click', limparClientes);
+      document.getElementById('btnLimparPedidos').addEventListener('click', limparPedidos);
+      document.getElementById('btnLimparAnotacoes').addEventListener('click', limparAnotacoes);
+      document.getElementById('btnExportarClientes').addEventListener('click', exportarClientes);
+      document.getElementById('btnExportarPedidos').addEventListener('click', exportarPedidos);
+      
+      // Botões dos modais
+      document.getElementById('btnSalvarPedido').addEventListener('click', function() {
+        const pedidoId = document.querySelector('#modalPedido .modal-title').textContent === 'Editar Pedido' 
+          ? parseInt(document.querySelector('#modalPedido button').getAttribute('data-id') || null) 
+          : null;
+        salvarPedido(pedidoId);
+      });
+      
+      document.getElementById('btnSalvarCliente').addEventListener('click', function() {
+        const clienteId = document.querySelector('#modalCliente .modal-title').textContent === 'Editar Cliente' 
+          ? parseInt(document.querySelector('#modalCliente button').getAttribute('data-id') || null) 
+          : null;
+        salvarCliente(clienteId);
+      });
+      
+      // Botões de confirmação
+      document.getElementById('btnConfirmarAcao').addEventListener('click', function() {
+        if (acaoAtual) {
+          acaoAtual();
+        }
+        fecharModal();
+      });
+      
+      document.getElementById('btnCancelarAcao').addEventListener('click', fecharModal);
+      
+      // Botões de fechar modal
+      document.querySelectorAll('.close-modal').forEach(btn => {
+        btn.addEventListener('click', fecharModal);
+      });
+      
+      // Fechar modal ao clicar fora
+      document.querySelectorAll('.modal').forEach(modal => {
+        modal.addEventListener('click', function(e) {
+          if (e.target === this) {
+            fecharModal();
+          }
+        });
+      });
+      
+      // Adicionar dados de exemplo se o banco estiver vazio
       if (DB.clientes.length === 0) {
         DB.adicionarCliente({ nome: 'Maria Silva', email: 'maria@email.com', telefone: '(11) 98765-4321' });
         DB.adicionarCliente({ nome: 'João Santos', email: 'joao@email.com', telefone: '(11) 91234-5678' });
@@ -1547,19 +1836,8 @@
       }
       
       // Carregar dados iniciais
-      carregarPedidos();
-      carregarClientes();
-      carregarAnotacoes();
-      atualizarDashboard();
-      atualizarRelatorios();
+      showTab('dashboard');
     });
-
-    // Fechar modal ao clicar fora
-    window.onclick = function(event) {
-      if (event.target.className === 'modal') {
-        event.target.style.display = 'none';
-      }
-    };
   </script>
 </body>
 </html>
